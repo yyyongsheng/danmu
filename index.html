@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  html,
+  body {
+    overflow: hidden;
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .danmu {
+    position: relative;
+    height: 350px;
+    width: 100%;
+    /* overflow: hidden; */
+    background: #ccc;
+  }
+
+  .bullet {
+    position: absolute;
+    padding: 5px 3px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    display: -webkit-flex;
+    display: flex;
+    display: -moz-box;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-align-items: center;
+    align-items: center;
+  }
+
+  .bullet img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+  }
+
+  .bullet p {
+    white-space: nowrap;
+    margin-left: 5px;
+    font-size: 15px;
+    color: #ffffff;
+  }
+</style>
+
+<body>
+  <div class="danmu">
+
+  </div>
+  <button class="send">发送弹幕</button>
+</body>
+
+</html>
+<script src="jquery.min.js"></script>
+
+<script>
+  var barrageArray = [
+    {
+      avatar: "https://img.letusmix.com/Fn7E3LWYJqETTkGZ4c8WZiDmweng?imageslim",
+      content: "楼主晒傻逼777777777777777777777777777777"
+    },
+    {
+      avatar: "https://img.letusmix.com/Fn7E3LWYJqETTkGZ4c8WZiDmweng?imageslim",
+      content: "ABCDEF5555555555555G"
+    },
+    {
+      avatar: "https://img.letusmix.com/Fn7E3LWYJqETTkGZ4c8WZiDmweng?imageslim",
+      content: "ABC123123123123DEFG"
+    },
+    {
+      avatar: "https://img.letusmix.com/Fn7E3LWYJqETTkGZ4c8WZiDmweng?imageslim",
+      content: "ABCDE44575FG"
+    },
+    {
+      avatar: "https://img.letusmix.com/Fn7E3LWYJqETTkGZ4c8WZiDmweng?imageslim",
+      content: "ABCD2222EFG"
+    },
+    {
+      avatar: "https://img.letusmix.com/Fn7E3LWYJqETTkGZ4c8WZiDmweng?imageslim",
+      content: "ABC1111DEFG"
+    },
+    {
+      avatar: "https://img.letusmix.com/Fn7E3LWYJqETTkGZ4c8WZiDmweng?imageslim",
+      content: "ABCD55555555555EFG"
+    },
+  ];
+
+
+  var danmu = $('.danmu')
+
+  var danmuWidht = $('.danmu').width()
+  var danmuHeight = $('.danmu').height()
+
+
+  console.log(danmuWidht, danmuHeight)
+
+  $('.send').click(function () {
+
+    var list = ['来啦来啦来阿拉', '777777777', '这波可以啊!', '神操作66666']
+
+    var item = list[Math.floor(Math.random() * list.length)]
+
+    createBarrage(item, 'http://img.letusmix.com/Fn7E3LWYJqETTkGZ4c8WZiDmweng?imageslim', true)
+  })
+
+  function createBarrage(content, avatar, isSendMsg) {
+
+    var divNode = $('<div></div>')
+
+    var imgNode = $('<img src="" />')
+
+    var pNode = $('<p></p>')
+
+
+    divNode.addClass('bullet')
+
+    danmu.append(divNode);
+
+    imgNode.attr('src', avatar)
+    pNode.html(content)
+
+    divNode.append(imgNode)
+    divNode.append(pNode)
+    console.log(divNode)
+
+
+    barrageOffsetLeft = getRandom(danmuWidht, danmuWidht * 2);
+    barrageOffsetLeft = isSendMsg ? danmuWidht : barrageOffsetLeft
+
+    var offsetTop = Math.random() * (danmuHeight) - divNode.outerHeight()
+
+    barrageOffsetTop = offsetTop < 0 ? divNode.outerHeight() : offsetTop
+
+
+    //执行初始化滚动
+    initBarrage.call(divNode, {
+      left: barrageOffsetLeft,
+      top: barrageOffsetTop,
+    });
+
+
+  }
+
+
+  //初始化弹幕移动(速度，延迟)
+  function initBarrage(obj) {
+
+    console.log(this, 'this')
+    console.log(obj, 'obj')
+
+    //初始化
+    obj.top = obj.top || 0;
+    obj.color = obj.color || '#fff';
+
+    this.css('left', obj.left + 'px')
+    this.css('top', obj.top + 'px')
+    this.css('color', obj.color)
+
+    //添加属性
+    this.distance = 0;
+    this.width = this.width()
+    console.log(this.width, 'width')
+
+    this.offsetLeft = obj.left;
+    this.timer = null;
+
+    //运动
+    barrageAnimate(this);
+
+  }
+
+
+  //弹幕动画
+  function barrageAnimate(obj) {
+    move(obj);
+    if (Math.abs(obj.distance) < obj.width + obj.offsetLeft) {
+      obj.timer = requestAnimationFrame(function () {
+        barrageAnimate(obj);
+      });
+    } else {
+      cancelAnimationFrame(obj.timer);
+      //删除节点
+      obj.remove()
+    }
+  }
+
+
+  //移动
+  function move(obj) {
+    obj.distance--;
+    obj.css('transform', 'translateX(' + obj.distance + 'px)')
+    obj.css('webkitTransform', 'translateX(' + obj.distance + 'px)')
+  }
+
+  //随机获取高度
+  function getRandom(start, end) {
+    return start + Math.random() * (end - start)
+  }
+
+  barrageArray.forEach(function (item, index) {
+    createBarrage(item.content, item.avatar, false);
+  });
+
+
+</script>
